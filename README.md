@@ -16,7 +16,7 @@ Alternatively, specify the path to this script from the command line with `mpv v
 
 ## Usage
 
-Default key-bindings (these work with command-line-specified filters as well):
+Default key-bindings:
 
 - `` ` ``           toggle REPL for filter inputs
 - `ctrl+z`          undo last filter
