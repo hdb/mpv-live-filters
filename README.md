@@ -1,11 +1,11 @@
 # mpv-live-filters
 
 
-A lua script for mpv that lets you add, remove and toggle ffmpeg video filters during mpv playback. Designed to easily test ffmpeg's command line filters without having to start and stop `ffplay` commands and without needing to use a bloated NLE. 
+A lua script for mpv that lets you add, remove and toggle ffmpeg video filters during mpv playback. Designed to easily test ffmpeg's command line filters without having to start and stop `ffplay` commands or use a bloated NLE. 
 
 This script is based on on James Ross-Gowan's [mpv-repl](https://github.com/rossy/mpv-repl) and Olivier Perret's [mpv-scripts](https://github.com/occivink/mpv-scripts), tuned specifically for streamlined use of filters. 
 
-![](https://imgur.com/a/wyiqcO1)
+![image](assets/live-filters.png)
 
 ## Setup 
 
