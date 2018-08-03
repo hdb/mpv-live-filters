@@ -34,6 +34,25 @@ local opts = {
 
 options.read_options(opts)
 
+function detect_platform()
+    local o = {}
+    -- Kind of a dumb way of detecting the platform but whatever
+    if mp.get_property_native('options/vo-mmcss-profile', o) ~= o then
+        return 'windows'
+    elseif mp.get_property_native('options/input-app-events', o) ~= o then
+        return 'macos'
+    end
+    return 'linux'
+end
+
+-- Pick a better default font for Windows and macOS
+local platform = detect_platform()
+if platform == 'windows' then
+    opts.font = 'Consolas'
+elseif platform == 'macos' then
+    opts.font = 'Menlo'
+end
+
 
 -- List of ffmpeg video filters for automcompletion in REPL
 -- Note: Not all ffmpeg filters are compatible with mpv. Depending on your hardware, some more intensive filters like "reverse" 
