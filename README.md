@@ -34,9 +34,15 @@ REPL mode key-bindings:
 - `enter`           add vf filter
 - `alt+enter`       set vf filter (removes current filters)
 
-See source for details on text-entry key-bindings for REPL -- they should be straightforward. 
+With the REPL active, type the vf filter options with any parameters. Multiple filters can be entered either all at once or with separate commands in sequence. 
 
-In REPL mode, most key-bindings that use alt/ctrl/super modifier keys continue to work, but key-bindings that do not are temporarily disabled so that it is possible to enter text.
+Example:
+
+    > tblend=c0_mode=overlay
+
+See source for details on default text-entry key-bindings for REPL -- they should be straightforward. 
+
+In REPL mode, most key-bindings that use alt/ctrl/super modifier keys continue to work (e.g., `ctrl+z` for undo filter), but key-bindings that do not are disabled so that it is possible to enter text.
 
 ## License
 
