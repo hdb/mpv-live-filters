@@ -109,23 +109,17 @@ local vfx_list = {
 }
 
 
-
--- read_options(saved_cmds,"live-filters") read options doesn't work b/c it doesn't allow importing variables w/o defaults
+-- ENTER SHORTCUTS FOR COMPLEX COMMANDS HERE...
 
 local saved_cmds  = {
-topmirror="\"lavfi=[[vid1]split[main][tmp];[tmp]crop=iw:ih/2:0:0,vflip[flip];[main][flip]overlay=0:H/2[vo]]\"",
-bottommirror="\"lavfi=[[vid1]split[main][tmp];[tmp]crop=iw:ih/2:0:ih/2,vflip[flip];[main][flip]overlay[vo]]\"",
-leftmirror="\"lavfi=[[vid1]split[main][tmp];[tmp]crop=iw/2:ih:0:0,hflip[flip];[main][flip]overlay=W/2[vo]]\"",
-rightmirror="\"lavfi=[[vid1]split[main][tmp];[tmp]crop=iw/2:ih:iw/2:0,hflip[flip];[main][flip]overlay[vo]]\"",
+mirrortop="\"lavfi=[[vid1]split[main][tmp];[tmp]crop=iw:ih/2:0:0,vflip[flip];[main][flip]overlay=0:H/2[vo]]\"",
+mirrorbottom="\"lavfi=[[vid1]split[main][tmp];[tmp]crop=iw:ih/2:0:ih/2,vflip[flip];[main][flip]overlay[vo]]\"",
+mirrorleft="\"lavfi=[[vid1]split[main][tmp];[tmp]crop=iw/2:ih:0:0,hflip[flip];[main][flip]overlay=W/2[vo]]\"",
+mirrorright="\"lavfi=[[vid1]split[main][tmp];[tmp]crop=iw/2:ih:iw/2:0,hflip[flip];[main][flip]overlay[vo]]\"",
+hstack="\"lavfi=[[vid1]split[v1][v2];[v1][v2]hstack[t]]\"",
+vstack="\"lavfi=[[vid1]split[v1][v2];[v1][v2]vstack[t]]\"",
+
 }
-
-local plus_msg="Enter shortcut: "
-local saved_cmd_input = ""
-
--- allow autocomplete for saved_cmds
-for k, v in ipairs(saved_cmds) do
-    vfx_list[#vfx_list] = v
-end
 
 local prop_list = mp.get_property_native('property-list')
 for _, opt in ipairs(mp.get_property_native('options')) do
@@ -349,52 +343,9 @@ function handle_enter()
         line=saved_cmds[line]
     end
 
-    -- Checks to see if it should treat as a save command key
-    if (line:find(plus_msg)) then
-        if (line~=plus_msg and saved_cmd_input~="") then
-            print('fuck yes')
-            key = line:gsub(plus_msg,"")
-            print(key)
-            saved_cmds[key]=saved_cmd_input
-
-            for k, v in ipairs(saved_cmds) do
-                print(k.." "..v)
-            end
-
-
-            saved_cmd_input=""
-        end
-        clear()
-        return
-    end
-
     mp.command('vf add '..line)
     
     clear()
-end
-
--- Save current command to saved_cmds with a shortcut entry
-function handle_plus()
-    if line == '' then
-        return
-    end
-
-    if history[#history] ~= line then
-        history[#history + 1] = line
-    end
-
-    -- skip if there is already an entry
-    if saved_cmds[line] ~= nil then
-        return
-    end
-
-    saved_cmd_input=line
-
-    clear()
-
-    line=plus_msg
-    go_end()
-    update()   
 end
 
 function handle_alt_enter()
@@ -683,7 +634,6 @@ local bindings = {
     { 'enter',       handle_enter                           },
     { 'alt+enter',   handle_alt_enter                       },
     { 'shift+enter', function() handle_char_input('\n') end },
-    { 'ctrl+enter',  handle_plus,                           },
     { 'bs',          handle_backspace                       },
     { 'shift+bs',    handle_backspace                       },
     { 'del',         handle_del                             },
