@@ -53,6 +53,16 @@ elseif platform == 'macos' then
     opts.font = 'Menlo'
 end
 
+function copy(obj, seen)
+  if type(obj) ~= 'table' then return obj end
+  if seen and seen[obj] then return seen[obj] end
+  local s = seen or {}
+  local res = setmetatable({}, getmetatable(obj))
+  s[obj] = res
+  for k, v in pairs(obj) do res[copy(k, s)] = copy(v, s) end
+  return res
+end
+
 
 -- List of ffmpeg video filters for automcompletion in REPL
 -- Note: Not all ffmpeg filters are compatible with mpv. Depending on your hardware, some more intensive filters like "reverse" 
@@ -70,7 +80,7 @@ local vfx_list = {
     "hwdownload", "hwmap", "hwupload", "hwupload_cuda", "hysteresis", "idet", "il", "inflate", "interlace", "kerndeint", 
     "lenscorrection", "limiter", "loop", "lumakey", "lut", "lut2", "lut3d", "lutrgb", "lutyuv", "maskedclamp", "maskedmerge", 
     "mcdeint", "mestimate", "metadata", "midequalizer", "minterpolate", "mpdecimate", "negate", "nlmeans", "nnedi", "noformat", 
-    "noise", "null", "oscilloscope", "overlay", "owdenoise", "pad", "palettegen", "paletteuse", "perms", "perspective", "phase", 
+    "noise", "normalize", "null", "oscilloscope", "overlay", "owdenoise", "pad", "palettegen", "paletteuse", "perms", "perspective", "phase", 
     "pixdesctest", "pixscope", "pp", "pp7", "prewitt", "pseudocolor", "psnr", "pullup", "qp", "random", "readeia608", "readvitc", 
     "realtime", "remap", "removegrain", "removelogo", "repeatfields", "reverse", "roberts", "rotate", "sab", "scale", "scale_vaapi", 
     "scale2ref", "selectivecolor", "sendcmd", "separatefields", "setdar", "setfield", "setpts", "setsar", "settb", "showinfo", 
@@ -97,6 +107,25 @@ local vfx_list = {
     "frei0r=vectorscope", "frei0r=vignette",
 
 }
+
+
+
+-- read_options(saved_cmds,"live-filters") read options doesn't work b/c it doesn't allow importing variables w/o defaults
+
+local saved_cmds  = {
+topmirror="\"lavfi=[[vid1]split[main][tmp];[tmp]crop=iw:ih/2:0:0,vflip[flip];[main][flip]overlay=0:H/2[vo]]\"",
+bottommirror="\"lavfi=[[vid1]split[main][tmp];[tmp]crop=iw:ih/2:0:ih/2,vflip[flip];[main][flip]overlay[vo]]\"",
+leftmirror="\"lavfi=[[vid1]split[main][tmp];[tmp]crop=iw/2:ih:0:0,hflip[flip];[main][flip]overlay=W/2[vo]]\"",
+rightmirror="\"lavfi=[[vid1]split[main][tmp];[tmp]crop=iw/2:ih:iw/2:0,hflip[flip];[main][flip]overlay[vo]]\"",
+}
+
+local plus_msg="Enter shortcut: "
+local saved_cmd_input = ""
+
+-- allow autocomplete for saved_cmds
+for k, v in ipairs(saved_cmds) do
+    vfx_list[#vfx_list] = v
+end
 
 local prop_list = mp.get_property_native('property-list')
 for _, opt in ipairs(mp.get_property_native('options')) do
@@ -315,8 +344,57 @@ function handle_enter()
         history[#history + 1] = line
     end
 
+    -- See if text is a saved command (overwrites any actual filters which has the same name)
+    if saved_cmds[line] ~= nil then
+        line=saved_cmds[line]
+    end
+
+    -- Checks to see if it should treat as a save command key
+    if (line:find(plus_msg)) then
+        if (line~=plus_msg and saved_cmd_input~="") then
+            print('fuck yes')
+            key = line:gsub(plus_msg,"")
+            print(key)
+            saved_cmds[key]=saved_cmd_input
+
+            for k, v in ipairs(saved_cmds) do
+                print(k.." "..v)
+            end
+
+
+            saved_cmd_input=""
+        end
+        clear()
+        return
+    end
+
     mp.command('vf add '..line)
+    
     clear()
+end
+
+-- Save current command to saved_cmds with a shortcut entry
+function handle_plus()
+    if line == '' then
+        return
+    end
+
+    if history[#history] ~= line then
+        history[#history + 1] = line
+    end
+
+    -- skip if there is already an entry
+    if saved_cmds[line] ~= nil then
+        return
+    end
+
+    saved_cmd_input=line
+
+    clear()
+
+    line=plus_msg
+    go_end()
+    update()   
 end
 
 function handle_alt_enter()
@@ -605,6 +683,7 @@ local bindings = {
     { 'enter',       handle_enter                           },
     { 'alt+enter',   handle_alt_enter                       },
     { 'shift+enter', function() handle_char_input('\n') end },
+    { 'ctrl+enter',  handle_plus,                           },
     { 'bs',          handle_backspace                       },
     { 'shift+bs',    handle_backspace                       },
     { 'del',         handle_del                             },
