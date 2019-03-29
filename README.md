@@ -37,9 +37,19 @@ With the REPL active, type the vf filter options with any parameters. Multiple f
 
 Example:
 
-    > tblend=c0_mode=overlay
+    > tblend=c0_mode=difference,eq=contrast=2    
 
-See source for details on default text-entry key-bindings for REPL -- they should be straightforward. 
+is equivalent to
+
+    > tblend=c0_mode=difference
+    > eq=contrast=2
+
+is equivalent to 
+
+    mpv video.mp4 -vf tblend=c0_mode=difference,eq=contrast=2
+
+
+See source for details on default text-entry key-bindings for REPL -- they should be straightforward (i.e., `home` to beginning of line, `up` to go to last entered text, etc.). 
 
 In REPL mode, most key-bindings that use alt/ctrl/super modifier keys continue to work (e.g., `ctrl+z` for undo filter), but key-bindings that do not are disabled so that it is possible to enter text.
 
