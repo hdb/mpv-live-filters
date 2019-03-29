@@ -6,8 +6,7 @@ A lua script for mpv that lets you add, remove, toggle and set shortcuts for ffm
 This script is based on James Ross-Gowan's [mpv-repl](https://github.com/rossy/mpv-repl) and Olivier Perret's [mpv-scripts](https://github.com/occivink/mpv-scripts), tuned specifically for streamlined use of filters. 
 
 <p align="middle">
-    <img src="assets/live-filters.png" width="48%" /> 
-    <img src="assets/live-filters-2.png" width="48%" />
+    <img src="assets/example.gif" width="50%" /> 
 </p>
 
 ## Setup 
