@@ -3,7 +3,7 @@
 
 A lua script for mpv that lets you add, remove, toggle and set shortcuts for ffmpeg video filters during mpv playback. Designed to easily test ffmpeg's command line filters without having to start and stop `ffplay` commands or use a bloated NLE.
 
-This script is based on on James Ross-Gowan's [mpv-repl](https://github.com/rossy/mpv-repl) and Olivier Perret's [mpv-scripts](https://github.com/occivink/mpv-scripts), tuned specifically for streamlined use of filters. 
+This script is based on James Ross-Gowan's [mpv-repl](https://github.com/rossy/mpv-repl) and Olivier Perret's [mpv-scripts](https://github.com/occivink/mpv-scripts), tuned specifically for streamlined use of filters. 
 
 <p align="middle">
     <img src="assets/live-filters.png" width="48%" /> 
