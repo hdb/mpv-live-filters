@@ -343,7 +343,11 @@ function handle_enter()
         line=saved_cmds[line]
     end
 
-    mp.command('vf add '..line)
+    if line:match '^af ' then
+        mp.command('af add '..line:gsub("^af ", ""))
+    else
+        mp.command('vf add '..line)
+    end
     
     clear()
 end
@@ -356,7 +360,12 @@ function handle_alt_enter()
         history[#history + 1] = line
     end
 
-    mp.command('vf set '..line)
+    if line:match '^af ' then
+        mp.command('af set '..line:gsub("^af ", ""))
+    else
+        mp.command('vf set '..line)
+    end
+
     clear()
 end
 
@@ -701,11 +710,14 @@ mp.enable_messages('info')
 --functions for removing/toggling filters
 
 local filters_undo_stack = {}
+local audio_filters_undo_stack = {}
 
 
 function toggle()
 
     local vf_table = mp.get_property_native("vf")
+    local af_table = mp.get_property_native("af")
+
     if #vf_table == 0 then
         
         if #filters_undo_stack == 0 then
@@ -713,7 +725,6 @@ function toggle()
         end
 
         for i = 1, #filters_undo_stack do
-            print(i)
             vf_table[#vf_table + 1] = filters_undo_stack[#filters_undo_stack + 1 -i]
         end
 
@@ -724,11 +735,33 @@ function toggle()
         return
     end
 
+    if #af_table == 0 then
+        
+        if #audio_filters_undo_stack == 0 then
+            return
+        end
+
+        for i = 1, #audio_filters_undo_stack do
+            af_table[#af_table + 1] = audio_filters_undo_stack[#audio_filters_undo_stack + 1 -i]
+        end
+
+        audio_filters_undo_stack = {}
+
+        mp.set_property_native("af", af_table)
+
+        return
+    end
+
     for i = 1, #vf_table do
-        print(i..'!')
         filters_undo_stack[#filters_undo_stack + 1] = vf_table[#vf_table + 1 - i]
     end
+
+    for i = 1, #af_table do
+        audio_filters_undo_stack[#filters_undo_stack + 1] = af_table[#af_table + 1 - i]
+    end
+
     mp.set_property_native("vf", {})
+    mp.set_property_native("af", {})
 end
 
 
@@ -742,6 +775,16 @@ function remove_last_filter()
     mp.set_property_native("vf", vf_table)
 end
 
+function remove_last_audio_filter()
+    local af_table = mp.get_property_native("af")
+    if #af_table == 0 then
+        return
+    end
+    audio_filters_undo_stack[#filters_undo_stack + 1] = af_table[#af_table]
+    af_table[#af_table] = nil
+    mp.set_property_native("af", af_table)
+end
+
 function undo_filter_removal()
     if #filters_undo_stack == 0 then
         return
@@ -752,14 +795,29 @@ function undo_filter_removal()
     mp.set_property_native("vf", vf_table)
 end
 
+function undo_audio_filter_removal()
+    if #audio_filters_undo_stack == 0 then
+        return
+    end
+    local af_table = mp.get_property_native("af")
+    af_table[#af_table + 1] = audio_filters_undo_stack[#audio_filters_undo_stack]
+    audio_filters_undo_stack[#audio_filters_undo_stack] = nil
+    mp.set_property_native("af", af_table)
+end
+
 function clear_filters()
     local vf_table = mp.get_property_native("vf")
-    if #vf_table == 0 then
+    local af_table = mp.get_property_native("af")
+    if #vf_table == 0 and #af_table == 0 then
         return
     end
     for i = 1, #vf_table do
         filters_undo_stack[#filters_undo_stack + 1] = vf_table[#vf_table + 1 - i]
     end
+    for i = 1, #af_table do
+        audio_filters_undo_stack[#filters_undo_stack + 1] = af_table[#af_table + 1 - i]
+    end
+    mp.set_property_native("af", {})
     mp.set_property_native("vf", {})
 end
 
@@ -772,3 +830,5 @@ mp.add_key_binding('ctrl+x', "toggle-filter", toggle)
 mp.add_key_binding('ctrl+shift+x', "clear-filters", clear_filters)
 mp.add_key_binding('ctrl+z', "remove-last-filter", remove_last_filter)
 mp.add_key_binding('ctrl+shift+z', "undo-filter-removal", undo_filter_removal)
+mp.add_key_binding('ctrl+a', "remove-audio-last-filter", remove_last_audio_filter)
+mp.add_key_binding('ctrl+shift+a', "undo-audio-filter-removal", undo_audio_filter_removal)
